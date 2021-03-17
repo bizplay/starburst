@@ -247,4 +247,42 @@ RSpec.describe Starburst::Announcement do
       end
     end
   end
+
+  describe '.all_recent_for' do
+    let(:current_user) { create(:user) }
+    let(:another_user) { create(:user) }
+    let!(:announcement1) { create(:announcement) }
+    let!(:announcement2) { create(:announcement) }
+    let!(:old_announcement1) { create(:announcement, start_delivering_at: 20.days.ago) }
+    let!(:old_announcement2) { create(:announcement, created_at: 3.weeks.ago) }
+
+    before do
+      create(:announcement_view, user: current_user, announcement: announcement2)
+    end
+
+    context 'for current user with no specific start time specified' do
+      subject { described_class.all_recent_for(current_user) }
+
+      it { is_expected.to contain_exactly(announcement1, announcement2) }
+    end
+
+    context 'for current user with a start time of 4 weeks ago' do
+      subject { described_class.all_recent_for(current_user, 4.weeks.ago) }
+
+      it { is_expected.to contain_exactly(announcement1, announcement2, old_announcement1, old_announcement2) }
+
+      it { is_expected.to contain_exactly(
+        an_object_having_attributes(viewed: 0),
+        an_object_having_attributes(viewed: 0),
+        an_object_having_attributes(viewed: 0),
+        an_object_having_attributes(viewed: 1)
+      ) }
+    end
+
+    context 'for another user with a start time of 4 weeks ago' do
+      subject { described_class.all_recent_for(another_user, 4.weeks.ago) }
+
+      it { is_expected.not_to include(an_object_having_attributes(viewed: 1)) }
+    end
+  end
 end
