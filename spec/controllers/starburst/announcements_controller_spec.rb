@@ -55,9 +55,9 @@ RSpec.describe Starburst::AnnouncementsController do
       end
     end
 
-    let(:announcement1) { create(:announcement, title: "Announcement 1") }
-    let(:announcement2) { create(:announcement, title: "Announcement 2") }
-    let(:announcement3) { create(:announcement, title: "Announcement 3") }
+    let!(:announcement1) { create(:announcement, title: "Announcement 1") }
+    let!(:announcement2) { create(:announcement, title: "Announcement 2") }
+    let!(:announcement3) { create(:announcement, title: "Announcement 3") }
     let(:params) { {} }
 
     before { allow(controller).to receive(:current_user).and_return(current_user) }
@@ -75,13 +75,13 @@ RSpec.describe Starburst::AnnouncementsController do
         end
       end
 
-      context 'when the user has already marked the announcement as read' do
+      context 'when the user has already marked the announcement as viewed' do
         before { create(:announcement_view, user_id: current_user.id, announcement: announcement2) }
 
-        it 'returns a JSON hash of the three announcements with one marked as read' do
+        it 'returns a JSON hash of the three announcements with one marked as viewed' do
           index
           parsed_response = JSON.parse(response.body)
-          expect(parsed_response.size).to eq(3)
+          expect(parsed_response[1]["viewed"]).to be_truthy
         end
       end
     end
