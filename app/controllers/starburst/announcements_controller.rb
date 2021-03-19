@@ -5,7 +5,7 @@ module Starburst
     def recent
       if respond_to?(Starburst.current_user_method, true) && send(Starburst.current_user_method)
         result = Announcement.all_recent_for(send(Starburst.current_user_method), 2.weeks.ago, params[:category])
-        render json: result, only: [ :id, :title, :body ], status: :ok
+        render json: result, only: [ :id, :title, :body, :read ], status: :ok
       else
         render json: nil, status: :unprocessable_entity
       end

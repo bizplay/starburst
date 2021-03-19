@@ -93,13 +93,13 @@ RSpec.describe Starburst::AnnouncementsController do
         end
       end
 
-      context 'when the user has already marked the announcement as viewed' do
+      context 'when the user has already marked the announcement as read' do
         before { create(:announcement_view, user_id: current_user.id, announcement: announcement2) }
 
-        it 'returns a JSON hash of the three announcements with one marked as viewed' do
+        it 'returns a JSON hash of the three announcements with one marked as read' do
           recent
           parsed_response = JSON.parse(response.body)
-          expect(parsed_response[1]["viewed"]).to be_truthy
+          expect(parsed_response[1]["read"]).to be_truthy
         end
       end
     end

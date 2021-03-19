@@ -27,11 +27,11 @@ module Starburst
       where(category.nil? ? "" : "category = '#{category}'")
     }
 
-    scope :with_viewed_by, lambda { |current_user|
+    scope :with_read_by, lambda { |current_user|
       joins("LEFT JOIN starburst_announcement_views ON
 				starburst_announcement_views.announcement_id = starburst_announcements.id AND
         starburst_announcement_views.user_id = #{sanitize_sql_for_conditions(current_user.id)}")
-        .select('starburst_announcements.*, COUNT(starburst_announcement_views.id) AS viewed')
+        .select('starburst_announcements.*, COUNT(starburst_announcement_views.id) AS read')
         .group('starburst_announcements.id')
     }
 
@@ -54,7 +54,7 @@ module Starburst
     end
 
     def self.all_recent_for(current_user, as_of = 2.weeks.ago, in_category = nil)
-      announcements_for_current_user(ready_for_delivery.newer_than(as_of).with_viewed_by(current_user).in_category(in_category).in_reverse_delivery_order, current_user)
+      announcements_for_current_user(ready_for_delivery.newer_than(as_of).with_read_by(current_user).in_category(in_category).in_reverse_delivery_order, current_user)
     end
 
     def self.user_matches_conditions(user, conditions = nil)

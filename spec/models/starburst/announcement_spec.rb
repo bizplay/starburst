@@ -272,10 +272,10 @@ RSpec.describe Starburst::Announcement do
       it { is_expected.to contain_exactly(announcement1, announcement2, old_announcement1, old_announcement2) }
 
       it { is_expected.to contain_exactly(
-        an_object_having_attributes(viewed: 0),
-        an_object_having_attributes(viewed: 0),
-        an_object_having_attributes(viewed: 0),
-        an_object_having_attributes(viewed: 1)
+        an_object_having_attributes(read: 0),
+        an_object_having_attributes(read: 0),
+        an_object_having_attributes(read: 0),
+        an_object_having_attributes(read: 1)
       ) }
     end
 
