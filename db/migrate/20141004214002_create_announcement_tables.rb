@@ -13,6 +13,7 @@ class CreateAnnouncementTables < ActiveRecord::Migration[4.2]
       t.datetime :start_delivering_at
       t.datetime :stop_delivering_at
       t.text :limit_to_users
+      t.integer :group_id
       t.timestamps
     end
   end
