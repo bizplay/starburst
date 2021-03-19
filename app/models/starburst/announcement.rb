@@ -23,6 +23,10 @@ module Starburst
       where("(start_delivering_at >= ? OR (start_delivering_at IS NULL AND starburst_announcements.created_at >= ?))", from_time, from_time)
     }
 
+    scope :in_category, lambda { |category|
+      where(category.nil? ? "" : "category = '#{category}'")
+    }
+
     scope :with_viewed_by, lambda { |current_user|
       joins("LEFT JOIN starburst_announcement_views ON
 				starburst_announcement_views.announcement_id = starburst_announcements.id AND
@@ -49,8 +53,8 @@ module Starburst
       end
     end
 
-    def self.all_recent_for(current_user, as_of = 2.weeks.ago)
-      announcements_for_current_user(ready_for_delivery.newer_than(as_of).with_viewed_by(current_user).in_reverse_delivery_order, current_user)
+    def self.all_recent_for(current_user, as_of = 2.weeks.ago, in_category = nil)
+      announcements_for_current_user(ready_for_delivery.newer_than(as_of).with_viewed_by(current_user).in_category(in_category).in_reverse_delivery_order, current_user)
     end
 
     def self.user_matches_conditions(user, conditions = nil)

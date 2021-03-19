@@ -46,17 +46,17 @@ RSpec.describe Starburst::AnnouncementsController do
     end
   end
 
-  describe '#index' do
-    subject(:index) do
+  describe '#recent' do
+    subject(:recent) do
       if Rails::VERSION::MAJOR < 5
-        get :index, **params
+        get :recent, **params
       else
-        get :index, params: params
+        get :recent, params: params
       end
     end
 
     let!(:announcement1) { create(:announcement, title: "Announcement 1") }
-    let!(:announcement2) { create(:announcement, title: "Announcement 2") }
+    let!(:announcement2) { create(:announcement, title: "Announcement 2", category: "en") }
     let!(:announcement3) { create(:announcement, title: "Announcement 3") }
     let(:params) { {} }
 
@@ -66,12 +66,30 @@ RSpec.describe Starburst::AnnouncementsController do
       let(:current_user) { create(:user) }
 
       context 'when the user has not marked the announcement as read yet' do
-        it { expect(index).to have_http_status(:ok) }
+        it { expect(recent).to have_http_status(:ok) }
 
         it 'returns a JSON hash of the three announcements' do
-          index
+          recent
           parsed_response = JSON.parse(response.body)
           expect(parsed_response.size).to eq(3)
+        end
+
+        it 'returns a JSON hash of announcements that do not contain the keys start_delivering_at and limit_to_users' do
+          recent
+          parsed_response = JSON.parse(response.body)
+          expect(parsed_response[0]).not_to have_key("start_delivering_at")
+          expect(parsed_response[0]).not_to have_key("limit_to_users")
+        end
+
+        context 'when we pass in category "en"' do
+          let(:params) { { category: "en" } }
+
+          it 'returns a JSON hash of only announcement 2 when we pass in category "en"' do
+            recent
+            parsed_response = JSON.parse(response.body)
+            expect(parsed_response.size).to eq(1)
+            expect(parsed_response[0]["title"]).to eq("Announcement 2")
+          end
         end
       end
 
@@ -79,7 +97,7 @@ RSpec.describe Starburst::AnnouncementsController do
         before { create(:announcement_view, user_id: current_user.id, announcement: announcement2) }
 
         it 'returns a JSON hash of the three announcements with one marked as viewed' do
-          index
+          recent
           parsed_response = JSON.parse(response.body)
           expect(parsed_response[1]["viewed"]).to be_truthy
         end
@@ -89,7 +107,7 @@ RSpec.describe Starburst::AnnouncementsController do
     context 'without a signed in user' do
       let(:current_user) { nil }
 
-      it { expect(index).to have_http_status(:unprocessable_entity) }
+      it { expect(recent).to have_http_status(:unprocessable_entity) }
     end
   end
 end

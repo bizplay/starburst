@@ -252,7 +252,7 @@ RSpec.describe Starburst::Announcement do
     let(:current_user) { create(:user) }
     let(:another_user) { create(:user) }
     let!(:announcement1) { create(:announcement) }
-    let!(:announcement2) { create(:announcement) }
+    let!(:announcement2) { create(:announcement, category: "en") }
     let!(:old_announcement1) { create(:announcement, start_delivering_at: 20.days.ago) }
     let!(:old_announcement2) { create(:announcement, created_at: 3.weeks.ago) }
 
@@ -283,6 +283,12 @@ RSpec.describe Starburst::Announcement do
       subject { described_class.all_recent_for(another_user, 4.weeks.ago) }
 
       it { is_expected.not_to include(an_object_having_attributes(viewed: 1)) }
+    end
+
+    context 'for current user with no start time 2 weeks ago and category "en"' do
+      subject { described_class.all_recent_for(current_user, 2.weeks.ago, "en") }
+
+      it { is_expected.to contain_exactly(announcement2) }
     end
   end
 end
